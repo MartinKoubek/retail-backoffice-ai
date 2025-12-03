@@ -18,23 +18,23 @@ def build_html_report(data: DocumentData, validation: List[Dict], ai_output: Dic
     ai_rows = "".join(f"<li>{rec}</li>" for rec in ai_output.get("recommendations", []))
     return f"""
     <html>
-        <body style="font-family: Arial, sans-serif;">
-            <h2>Retail Back-Office AI Report</h2>
+        <body style="font-family: Arial, sans-serif; background:#0f172a; color:#e2e8f0; padding:12px;">
+            <h2 style="color:#e2e8f0;">Retail Back-Office AI Report</h2>
             <p><strong>Document ID:</strong> {data.document_id or 'N/A'}</p>
             <p><strong>Date:</strong> {data.document_date or 'N/A'}</p>
             <p><strong>Supplier:</strong> {data.supplier or 'N/A'}</p>
             <h3>Items</h3>
-            <table border="1" cellspacing="0" cellpadding="6">
-                <tr><th>SKU</th><th>Name</th><th>Quantity</th><th>Price</th></tr>
+            <table border="1" cellspacing="0" cellpadding="6" style="border-color:#334155;color:#e2e8f0;">
+                <tr style="background:#1e293b;"><th>SKU</th><th>Name</th><th>Quantity</th><th>Price</th></tr>
                 {items_rows if items_rows else '<tr><td colspan="4">No items detected</td></tr>'}
             </table>
             <h3>Validation</h3>
-            <ul>{validation_rows or '<li>No issues detected</li>'}</ul>
+            <ul style="color:#e2e8f0;">{validation_rows or '<li>No issues detected</li>'}</ul>
             <h3>AI Suggestions</h3>
-            <ul>{ai_rows or '<li>No suggestions</li>'}</ul>
+            <ul style="color:#e2e8f0;">{ai_rows or '<li>No suggestions</li>'}</ul>
             <p><strong>Recommended action:</strong> {ai_output.get("recommended_action", "N/A")}</p>
             <h3>JSON Output</h3>
-            <pre>{json.dumps(data.to_dict(), indent=2)}</pre>
+            <pre style="background:#0b1221; color:#e2e8f0; padding:10px; border:1px solid #334155;">{json.dumps(data.to_dict(), indent=2)}</pre>
         </body>
     </html>
     """
