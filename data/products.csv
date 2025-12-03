@@ -1,0 +1,5 @@
+sku,name,max_quantity
+SKU-100,Premium Widget,1
+SKU-200,Logistics Crate,80
+SKU-300,Replacement Part,60
+SKU-500,Unknown Item,200
