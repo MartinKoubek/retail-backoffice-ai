@@ -1,0 +1,8 @@
+Date: 2024-05-12
+Invoice ID: INV-2024-0512
+Supplier: Northwind Traders
+
+Items
+SKU-100 Premium Widget 10 19.99
+SKU-200 Logistics Crate 5 8.50
+SKU-500 Unknown Item 150 2.50

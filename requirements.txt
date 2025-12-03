@@ -1,0 +1,10 @@
+streamlit>=1.30.0
+pypdf>=4.0.0
+fpdf2>=2.7.8
+Pillow>=10.0.0
+pdf2image>=1.17.0
+pytesseract>=0.3.10
+# OCR requires the Tesseract binary installed on the system.
+# Optional LLM client:
+# openai>=1.30.0
+pytest>=8.0.0
