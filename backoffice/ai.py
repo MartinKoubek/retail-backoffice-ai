@@ -6,23 +6,27 @@ from .extraction import DocumentData
 
 
 def suggest_corrections(data: DocumentData, validation_results: List[Dict], catalog: Dict[str, Dict]) -> Dict:
-    suggestions: List[str] = []
+    suggestions: List[Dict[str, str]] = []
+
+    def add(message: str, severity: str) -> None:
+        suggestions.append({"message": message, "severity": severity})
+
     for issue in validation_results:
         msg = issue["message"]
         if "SKU" in msg and "not in catalog" in msg and data.items:
             unknown_sku = msg.split("SKU")[-1].split()[0]
             nearest = _closest_sku(unknown_sku, catalog)
             if nearest:
-                suggestions.append(f"Did you mean SKU {nearest}?")
+                add(f"Did you mean SKU {nearest}?", "notice")
         elif "quantity" in msg and "exceeds" in msg:
-            suggestions.append("Reduce quantity to expected range or confirm with supplier.")
+            add("Reduce quantity to expected range or confirm with supplier.", "warning")
         elif "Missing required field" in msg:
-            suggestions.append("Provide the missing header fields before approval.")
+            add("Provide the missing header fields before approval.", "critical")
 
     if not validation_results:
-        suggestions.append("Looks good. Consider auto-approving similar documents.")
+        add("Looks good. Consider auto-approving similar documents.", "info")
     if not data.supplier and catalog:
-        suggestions.append("Supplier missing; infer from SKU ownership or ask requester.")
+        add("Supplier missing; infer from SKU ownership or ask requester.", "notice")
 
     recommended_action = _recommended_action(validation_results)
     return {
@@ -62,4 +66,3 @@ def _closest_sku(target: str, catalog: Dict[str, Dict]) -> str:
 
 def llm_enabled() -> bool:
     return bool(os.getenv("OPENAI_API_KEY"))
-

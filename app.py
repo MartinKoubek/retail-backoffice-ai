@@ -61,8 +61,8 @@ def save_catalog_rows(path: Path, rows: List[Dict]) -> None:
 
 
 def main():
-    st.set_page_config(page_title="Retail Back-Office AI Demo", layout="wide")
-    st.title("Retail Back-Office AI Automation")
+    st.set_page_config(page_title="AI Back-Office Assistant", layout="wide")
+    st.title("AI Back-Office Assistant")
     st.markdown(
         "<div style='font-size:18px; font-weight:600;'>"
         "Reduce manual work. Detect errors. Accelerate operations — with AI."
@@ -164,9 +164,19 @@ def main():
                 st.success("No validation issues found.")
 
         with ai_tab:
+            severity_labels = {
+                "critical": "🔴 Critical — can’t proceed",
+                "warning": "🟠 Warning — review needed",
+                "notice": "🟡 Notice — minor issue",
+                "info": "🟢 Info — optional improvement",
+            }
             st.write(f"Recommended action: **{ai_output.get('recommended_action', '').title()}**")
             for rec in ai_output.get("recommendations", []):
-                st.markdown(f"- {rec}")
+                if isinstance(rec, dict):
+                    badge = severity_labels.get(rec.get("severity"), severity_labels["info"])
+                    st.markdown(f"- {badge}: {rec.get('message', '')}")
+                else:
+                    st.markdown(f"- {rec}")
             st.caption(ai_output.get("short_summary", ""))
 
         with report_tab:

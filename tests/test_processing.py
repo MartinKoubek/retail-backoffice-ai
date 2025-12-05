@@ -25,7 +25,7 @@ def test_process_txt_sample():
 
     assert doc.document_id == "INV-2024-0512"
     assert len(doc.items) == 3
-    assert any(issue["level"] == "warning" for issue in validation)
+    assert validation == []
     assert html_report and pdf_report
     assert not warnings
 

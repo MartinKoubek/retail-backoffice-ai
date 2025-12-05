@@ -15,7 +15,10 @@ def build_html_report(data: DocumentData, validation: List[Dict], ai_output: Dic
     validation_rows = "".join(
         f"<li><strong>{entry['level'].title()}:</strong> {entry['message']}</li>" for entry in validation
     )
-    ai_rows = "".join(f"<li>{rec}</li>" for rec in ai_output.get("recommendations", []))
+    ai_rows = "".join(
+        f"<li>{_severity_badge(rec)} {rec.get('message', '')}</li>" if isinstance(rec, dict) else f"<li>{rec}</li>"
+        for rec in ai_output.get("recommendations", [])
+    )
     return f"""
     <html>
         <body style="font-family: Arial, sans-serif; background:#0f172a; color:#e2e8f0; padding:12px;">
@@ -69,7 +72,11 @@ def build_pdf_report(data: DocumentData, validation: List[Dict], ai_output: Dict
     line("")
     line("AI Suggestions:")
     for rec in ai_output.get("recommendations", []):
-        line(f"- {rec}")
+        if isinstance(rec, dict):
+            label = _severity_label(rec.get("severity"))
+            line(f"- {label} {rec.get('message', '')}")
+        else:
+            line(f"- {rec}")
     if not ai_output.get("recommendations"):
         line("- No suggestions")
     line(f"Recommended action: {ai_output.get('recommended_action', 'N/A')}")
@@ -81,3 +88,23 @@ def build_pdf_report(data: DocumentData, validation: List[Dict], ai_output: Dict
     else:
         buffer.write(str(pdf_bytes).encode("latin1"))
     return buffer.getvalue()
+
+
+def _severity_badge(rec: Dict) -> str:
+    icon_map = {
+        "critical": "🔴 Critical",
+        "warning": "🟠 Warning",
+        "notice": "🟡 Notice",
+        "info": "🟢 Info",
+    }
+    return f"<strong>{icon_map.get(rec.get('severity'), '🟢 Info')}</strong> —" if rec else ""
+
+
+def _severity_label(severity: str) -> str:
+    text_map = {
+        "critical": "Critical",
+        "warning": "Warning",
+        "notice": "Notice",
+        "info": "Info",
+    }
+    return text_map.get(severity, "Info")
