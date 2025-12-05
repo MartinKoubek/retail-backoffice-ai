@@ -82,10 +82,12 @@ def parse_supplier(text: str) -> Optional[str]:
 
 
 def parse_items(text: str) -> List[DocumentItem]:
-    items = []
-    for raw_line in text.splitlines():
-        line = raw_line.strip()
-        if not line or len(line.split()) < 2:
+    items: List[DocumentItem] = []
+    lines = [ln.strip() for ln in text.splitlines() if ln.strip()]
+
+    # Primary pass: single-line items containing SKU, quantity, and price on the same line.
+    for line in lines:
+        if len(line.split()) < 2:
             continue
         line_lower = line.lower()
         if any(keyword in line_lower for keyword in ("date", "invoice", "supplier", "items")) and "sku" not in line_lower:
@@ -111,6 +113,44 @@ def parse_items(text: str) -> List[DocumentItem]:
 
         items.append(DocumentItem(sku=sku, name=name or None, quantity=qty, price=price))
 
+    if items:
+        return items
+
+    # Fallback: columnar PDFs where SKU, name, qty, and price are split across lines.
+    idx = 0
+    while idx < len(lines):
+        line = lines[idx]
+        if not _looks_like_sku(line):
+            idx += 1
+            continue
+
+        sku = line
+        name = None
+        qty = None
+        price = None
+
+        # Peek ahead for name, quantity, unit price.
+        if idx + 1 < len(lines) and not lines[idx + 1].isdigit() and not _is_price(lines[idx + 1]):
+            name = lines[idx + 1]
+            idx += 1
+
+        if idx + 1 < len(lines) and lines[idx + 1].isdigit():
+            qty = int(lines[idx + 1])
+            idx += 1
+
+        if idx + 1 < len(lines) and _is_price(lines[idx + 1]):
+            price = float(lines[idx + 1])
+            idx += 1
+
+        # Optionally skip line total if present; value not used.
+        if idx + 1 < len(lines) and _is_price(lines[idx + 1]):
+            idx += 1
+
+        if qty is not None and price is not None:
+            items.append(DocumentItem(sku=sku, name=name or None, quantity=qty, price=price))
+
+        idx += 1
+
     return items
 
 
@@ -120,6 +160,10 @@ def _is_price(value: str) -> bool:
         return True
     except ValueError:
         return False
+
+
+def _looks_like_sku(value: str) -> bool:
+    return bool(re.match(r"^[A-Za-z]{2,}-\d+", value))
 
 
 def extract_structured_data(text: str) -> DocumentData:

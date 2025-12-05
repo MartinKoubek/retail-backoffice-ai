@@ -72,3 +72,33 @@ def test_process_png_with_mocked_ocr(monkeypatch):
     assert any(item.sku == "SKU-300" for item in doc.items)
     assert html_report and pdf_report
     assert warnings == []
+
+
+def test_process_pdf_sample_invoice():
+    pdf_path = Path("samples/sample_invoice.pdf")
+    doc, validation, ai, html_report, pdf_report, warnings = process_document(
+        InMemoryFile(pdf_path.read_bytes(), pdf_path.name)
+    )
+
+    assert doc.document_date == "2024-05-12"
+    assert doc.document_id is not None
+    assert any(item.sku == "SKU-100" for item in doc.items)
+    assert len(doc.items) >= 3
+    assert html_report and pdf_report
+    assert warnings == []
+
+
+def test_process_pdf_sample_invoice_northwind():
+    pdf_path = Path("samples/sample_invoice_northwind.pdf")
+    doc, validation, ai, html_report, pdf_report, warnings = process_document(
+        InMemoryFile(pdf_path.read_bytes(), pdf_path.name)
+    )
+
+    assert doc.document_date == "2024-05-12"
+    assert doc.document_id == "INV-2024-0512"
+    assert doc.supplier == "Northwind Traders"
+    assert len(doc.items) == 3
+    assert {item.sku for item in doc.items} == {"SKU-100", "SKU-200", "SKU-500"}
+    assert not any(issue["level"] == "error" for issue in validation)
+    assert html_report and pdf_report
+    assert warnings == []

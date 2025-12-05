@@ -63,6 +63,12 @@ def save_catalog_rows(path: Path, rows: List[Dict]) -> None:
 def main():
     st.set_page_config(page_title="Retail Back-Office AI Demo", layout="wide")
     st.title("Retail Back-Office AI Automation")
+    st.markdown(
+        "<div style='font-size:18px; font-weight:600;'>"
+        "Reduce manual work. Detect errors. Accelerate operations — with AI."
+        "</div>",
+        unsafe_allow_html=True,
+    )
     st.caption("Document ingestion → Extraction → Validation → AI Suggestions → Report")
 
     st.sidebar.header("How to use")
@@ -73,18 +79,19 @@ def main():
     )
     st.sidebar.markdown("Sample files:")
     samples_dir = Path("samples")
-    if samples_dir.exists():
-        for sample_file in sorted(samples_dir.glob("*")):
-            if sample_file.is_file():
-                col_name, col_btn = st.sidebar.columns([4, 1])
-                col_name.write(sample_file.name)
-                col_btn.download_button(
-                    label="⬇",
-                    data=sample_file.read_bytes(),
-                    file_name=sample_file.name,
-                    key=f"dl_{sample_file.name}",
-                    help=f"Download {sample_file.name}",
-                )
+    sample_files = sorted(f for f in samples_dir.glob("*") if f.is_file()) if samples_dir.exists() else []
+    if sample_files:
+        selected_sample = st.sidebar.selectbox(
+            "Choose a sample to download", [f.name for f in sample_files], key="sample_select"
+        )
+        sample_path = next(f for f in sample_files if f.name == selected_sample)
+        st.sidebar.download_button(
+            label="Download selected",
+            data=sample_path.read_bytes(),
+            file_name=sample_path.name,
+            key="dl_selected_sample",
+            help=f"Download {sample_path.name}",
+        )
     else:
         st.sidebar.caption("No sample files found.")
 

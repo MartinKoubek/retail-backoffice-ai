@@ -2,7 +2,7 @@
 
 Small Streamlit app that ingests retail back-office documents, extracts structured data, validates it against a product catalog, proposes AI-style corrections, and produces reports (HTML in-app, downloadable JSON/PDF).
 
-![Mock UI](docs/mock-ui.svg)
+![Mock UI](docs/img.png)
 
 ## What it does
 - Upload PDF, image (PNG/JPG), text, or CSV documents.
